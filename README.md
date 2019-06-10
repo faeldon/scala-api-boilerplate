@@ -1,5 +1,5 @@
 # Scala API Boilerplate [![License: MIT][license-badge]][license-link] [![Build Status][build-badge]][build-link] [![Chat][gitter-badge]][gitter-link]
-==============
+
 A TypeLevel API Boilerplate inspired by [scala-pet-store](https://github.com/pauljamescleary/scala-pet-store)
 
 ## Features
@@ -69,6 +69,11 @@ Then, in a separate terminal, run the test suite:
 > cd functional_test
 > ./run.py live_tests -v
 ```
+
+## Contributing
+
+Contributions are always welcome, no matter how large or small. Before contributing,
+please read the [code of conduct](./.github/CODE_OF_CONDUCT.md).
 
 [license-badge]: https://img.shields.io/badge/License-MIT-yellow.svg
 [license-link]: https://github.com/faeldon/scala-api-boilerplate/blob/master/LICENSE
