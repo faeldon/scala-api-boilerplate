@@ -21,7 +21,7 @@ import tsec.mac.jca.HMACSHA256
 object Server extends IOApp {
   def createServer[F[_] : ContextShift : ConcurrentEffect : Timer]: Resource[F, H4Server[F]] =
     for {
-      conf           <- Resource.liftF(parser.decodePathF[F, PetStoreConfig]("petstore"))
+      conf           <- Resource.liftF(parser.decodePathF[F, PetStoreConfig]("api"))
       connEc         <- ExecutionContexts.fixedThreadPool[F](conf.db.connections.poolSize)
       txnEc          <- ExecutionContexts.cachedThreadPool[F]
       xa             <- DatabaseConfig.dbTransactor(conf.db, connEc, txnEc)

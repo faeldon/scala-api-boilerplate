@@ -21,7 +21,7 @@ package object doobie {
    * Provide a transactor for testing once schema has been migrated.
    */
   def initializedTransactor[F[_] : Effect : Async : ContextShift] : F[Transactor[F]] = for {
-    petConfig <- parser.decodePathF[F, PetStoreConfig]("petstore")
+    petConfig <- parser.decodePathF[F, PetStoreConfig]("api")
     _ <- DatabaseConfig.initializeDb(petConfig.db)
   } yield getTransactor(petConfig.db)
 
