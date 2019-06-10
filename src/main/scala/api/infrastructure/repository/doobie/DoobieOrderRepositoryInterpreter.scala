@@ -27,7 +27,8 @@ private object OrderSQL {
   def insert(order : Order) : Update0 = sql"""
     INSERT INTO ORDERS (PET_ID, SHIP_DATE, STATUS, COMPLETE, USER_ID)
     VALUES (${order.petId}, ${order.shipDate}, ${order.status}, ${order.complete}, ${order.userId.get})
-  """.update
+    RETURNING ID
+  """.update // NOTE: Manually returning ID since postgresql is putting double quotes on "ID" causing error
 
   def delete(orderId : Long) : Update0 = sql"""
     DELETE FROM ORDERS

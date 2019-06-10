@@ -20,7 +20,8 @@ private object PetSQL {
   def insert(pet: Pet) : Update0 = sql"""
     INSERT INTO PET (NAME, CATEGORY, BIO, STATUS, TAGS, PHOTO_URLS)
     VALUES (${pet.name}, ${pet.category}, ${pet.bio}, ${pet.status}, ${pet.tags}, ${pet.photoUrls})
-  """.update
+    RETURNING ID
+  """.update // NOTE: Manually returning ID since postgresql is putting double quotes on "ID" causing error
 
   def update(pet: Pet, id: Long) : Update0 = sql"""
     UPDATE PET

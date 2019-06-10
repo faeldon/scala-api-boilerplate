@@ -21,7 +21,8 @@ private object UserSQL {
   def insert(user: User): Update0 = sql"""
     INSERT INTO USERS (USER_NAME, FIRST_NAME, LAST_NAME, EMAIL, HASH, PHONE, ROLE)
     VALUES (${user.userName}, ${user.firstName}, ${user.lastName}, ${user.email}, ${user.hash}, ${user.phone}, ${user.role})
-  """.update
+    RETURNING ID
+  """.update // NOTE: Manually returning ID since postgresql is putting double quotes on "ID" causing error
 
   def update(user: User, id: Long): Update0 = sql"""
     UPDATE USERS
