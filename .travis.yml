@@ -1,0 +1,14 @@
+language: scala
+dist: xenial
+scala:
+   - 2.12.8
+   - 2.13.0-M5
+
+jobs:
+  include:
+      before_script:
+        - sbt stage
+
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION test
+        - ./build.sh

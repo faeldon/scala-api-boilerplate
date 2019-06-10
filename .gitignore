@@ -1,0 +1,39 @@
+# Project specific
+.env
+.logs
+*.log
+.db/
+
+# SBT specific
+*.class
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# IDE/Editory specific
+.scala_dependencies
+.worksheet
+.ensime
+.metals
+.bloop
+.projectile
+.idea
+.idea_modules
+.classpath
+.project
+.settings
+.ensime
+.ensime_cache
+*.sublime-workspace
+*.swp
+
+# Python Test Scipts
+.virtualenv
+__pycache__
+*.pyc
