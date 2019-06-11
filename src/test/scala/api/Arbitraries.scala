@@ -69,15 +69,15 @@ trait PetStoreArbitraries {
 
   implicit val user = Arbitrary[User] {
     for {
+      id <- Gen.option(Gen.posNum[Long])
+      role <- arbitrary[Role]
       userName <- userNameGen
       firstName <- arbitrary[String]
       lastName <- arbitrary[String]
       email <- arbitrary[String]
       password <- arbitrary[String]
       phone <- arbitrary[String]
-      id <- Gen.option(Gen.posNum[Long])
-      role <- arbitrary[Role]
-    } yield User(userName, firstName, lastName, email, password, phone, id, role)
+    } yield User(id, role, userName, firstName, lastName, email, password, phone)
   }
 
   case class AdminUser(value: User)
@@ -97,14 +97,14 @@ trait PetStoreArbitraries {
 
   implicit val userSignup = Arbitrary[SignupRequest] {
     for {
+      role <- arbitrary[Role]
       userName <- userNameGen
       firstName <- arbitrary[String]
       lastName <- arbitrary[String]
       email <- arbitrary[String]
       password <- arbitrary[String]
       phone <- arbitrary[String]
-      role <- arbitrary[Role]
-    } yield SignupRequest(userName, firstName, lastName, email, password, phone, role)
+    } yield SignupRequest(role, userName, firstName, lastName, email, password, phone)
   }
 
   implicit val secureRandomId = Arbitrary[SecureRandomId] {

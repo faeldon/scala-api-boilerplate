@@ -4,14 +4,14 @@ import cats.Applicative
 import tsec.authorization.AuthorizationInfo
 
 case class User(
-    userName: String,
-    firstName: String,
-    lastName: String,
-    email: String,
-    hash: String,
-    phone: String,
-    id: Option[Long] = None,
-    role: Role
+  id: Option[Long] = None,
+  role: Role,
+  userName: String,
+  firstName: String,
+  lastName: String,
+  email: String,
+  hash: String,
+  phone: String
 )
 
 object User {

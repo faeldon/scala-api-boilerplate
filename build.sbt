@@ -19,6 +19,7 @@ val ScalaCheckVersion      = "1.14.0"
 val ScalaTestVersion       = "3.0.7"
 val FlywayVersion          = "5.2.4"
 val TsecVersion            = "0.1.0"
+val ShapelessVersion       = "2.3.3"
 
 libraryDependencies ++= Seq(
   "org.typelevel"         %% "cats-core"              % CatsVersion,
@@ -50,7 +51,10 @@ libraryDependencies ++= Seq(
   "io.github.jmcardon"    %% "tsec-signatures"        % TsecVersion,
   "io.github.jmcardon"    %% "tsec-jwt-mac"           % TsecVersion,
   "io.github.jmcardon"    %% "tsec-jwt-sig"           % TsecVersion,
-  "io.github.jmcardon"    %% "tsec-http4s"            % TsecVersion
+  "io.github.jmcardon"    %% "tsec-http4s"            % TsecVersion,
+
+  "com.chuusai"           %% "shapeless"              % ShapelessVersion
+
 )
 
 def scalacOptionsForVersion(version: String): Seq[String] = {
