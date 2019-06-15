@@ -10,6 +10,7 @@ import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, HttpRoutes, QueryParamDecoder}
 
+import api.domain._
 import api.domain.{PetAlreadyExistsError, PetNotFoundError}
 import api.domain.pets.{Pet, PetService, PetStatus}
 import api.domain.authentication.Auth
@@ -109,7 +110,7 @@ class PetEndpoints[F[_]: Sync, Auth: JWTMacAlgo] extends Http4sDsl[F] {
       } yield resp
   }
 
-  def endpoints(petService: PetService[F], auth: SecuredRequestHandler[F, Long, User, AugmentedJWT[Auth, Long]]): HttpRoutes[F] = {
+  def endpoints(petService: PetService[F], auth: SecuredRequestHandler[F, UserId, User, AugmentedJWT[Auth, UserId]]): HttpRoutes[F] = {
     val authEndpoints: AuthService[F, Auth]  = {
       val allRoles =
         createPetEndpoint(petService) orElse
@@ -130,7 +131,7 @@ class PetEndpoints[F[_]: Sync, Auth: JWTMacAlgo] extends Http4sDsl[F] {
 
 object PetEndpoints {
   def endpoints[F[_]: Sync, Auth: JWTMacAlgo](petService: PetService[F],
-                                                auth: SecuredRequestHandler[F, Long, User, AugmentedJWT[Auth, Long]]
+                                                auth: SecuredRequestHandler[F, UserId, User, AugmentedJWT[Auth, UserId]]
                                                ): HttpRoutes[F] =
     new PetEndpoints[F, Auth].endpoints(petService, auth)
 }

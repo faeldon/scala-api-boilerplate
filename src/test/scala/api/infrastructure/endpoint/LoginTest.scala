@@ -2,6 +2,7 @@ package api.infrastructure.endpoint
 
 import cats.data.Kleisli
 import cats.effect.IO
+import api.domain.implicits._
 import api.domain.authentication.{LoginRequest, SignupRequest}
 import api.domain.users.{Role, User}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}

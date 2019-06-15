@@ -1,9 +1,12 @@
-package api
+ package api
 
+import java.util.UUID
 import java.time.Instant
 import cats.effect.IO
 import org.scalacheck._
 import org.scalacheck.Arbitrary.arbitrary
+import api.domain._
+import api.domain.syntax._
 import api.domain.orders._
 import api.domain.orders.OrderStatus._
 import api.domain.{orders, pets}
@@ -23,6 +26,10 @@ trait PetStoreArbitraries {
   val userNameLength = 16
   val userNameGen: Gen[String] = Gen.listOfN(userNameLength, Gen.alphaChar).map(_.mkString)
 
+  implicit val userId = Arbitrary[UserId] {
+    UUID.randomUUID().asUserId
+  }
+
   implicit val instant = Arbitrary[Instant] {
     for {
       millis <- Gen.posNum[Long]
@@ -33,7 +40,7 @@ trait PetStoreArbitraries {
     Gen.oneOf(Approved, Delivered, Placed)
   }
 
-  def order(userId: Option[Long]): Arbitrary[Order] = Arbitrary[Order] {
+  def order(userId: Option[UserId]): Arbitrary[Order] = Arbitrary[Order] {
     for {
       petId <- Gen.posNum[Long]
       shipDate <- Gen.option(instant.arbitrary)
@@ -69,7 +76,7 @@ trait PetStoreArbitraries {
 
   implicit val user = Arbitrary[User] {
     for {
-      id <- Gen.option(Gen.posNum[Long])
+      id <- Gen.option(UUID.randomUUID().asUserId)
       role <- arbitrary[Role]
       userName <- userNameGen
       firstName <- arbitrary[String]

@@ -6,6 +6,7 @@ import org.http4s.implicits._
 import org.http4s.dsl._
 import tsec.passwordhashers.jca.BCrypt
 import api.PetStoreArbitraries
+import api.domain.implicits._
 import api.domain.users._
 import api.domain.authentication._
 import api.infrastructure.repository.inmemory.UserRepositoryInMemoryInterpreter

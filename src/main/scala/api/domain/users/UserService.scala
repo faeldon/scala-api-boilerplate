@@ -13,13 +13,13 @@ class UserService[F[_]](userRepo: UserRepositoryAlgebra[F], validation: UserVali
       saved <- EitherT.liftF(userRepo.create(user))
     } yield saved
 
-  def getUser(userId: Long)(implicit F: Functor[F]): EitherT[F, UserNotFoundError.type, User] =
+  def getUser(userId: UserId)(implicit F: Functor[F]): EitherT[F, UserNotFoundError.type, User] =
     userRepo.get(userId).toRight(UserNotFoundError)
 
   def getUserByName(userName: String)(implicit F: Functor[F]): EitherT[F, UserNotFoundError.type, User] =
     userRepo.findByUserName(userName).toRight(UserNotFoundError)
 
-  def deleteUser(userId: Long)(implicit F: Functor[F]): F[Unit] =
+  def deleteUser(userId: UserId)(implicit F: Functor[F]): F[Unit] =
     userRepo.delete(userId).value.void
 
   def deleteByUserName(userName: String)(implicit F: Functor[F]): F[Unit] =

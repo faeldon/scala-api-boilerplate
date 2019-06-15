@@ -2,6 +2,8 @@ package api.infrastructure.repository.doobie
 
 import java.time.Instant
 
+import api.domain._
+import api.domain.implicits._
 import cats._
 import cats.data._
 import cats.effect.Bracket
@@ -18,46 +20,46 @@ private object AuthSQL {
   implicit val secureRandomIdPut: Put[SecureRandomId] =
     Put[String].contramap((_: Id[SecureRandomId]).widen)
 
-  def insert[A](jwt: AugmentedJWT[A, Long])(implicit hs: JWSSerializer[JWSMacHeader[A]]): Update0 =
-    sql"""INSERT INTO JWT (ID, JWT, IDENTITY, EXPIRY, LAST_TOUCHED)
+  def insert[A](jwt: AugmentedJWT[A, UserId])(implicit hs: JWSSerializer[JWSMacHeader[A]]): Update0 =
+    sql"""INSERT INTO JWT (ID, JWT, USER_ID, EXPIRY, LAST_TOUCHED)
           VALUES (${jwt.id}, ${jwt.jwt.toEncodedString}, ${jwt.identity}, ${jwt.expiry}, ${jwt.lastTouched})
        """.update
 
-  def update[A](jwt: AugmentedJWT[A, Long])(implicit hs: JWSSerializer[JWSMacHeader[A]]): Update0 =
-    sql"""UPDATE JWT SET JWT = ${jwt.jwt.toEncodedString}, IDENTITY = ${jwt.identity},
+  def update[A](jwt: AugmentedJWT[A, UserId])(implicit hs: JWSSerializer[JWSMacHeader[A]]): Update0 =
+    sql"""UPDATE JWT SET JWT = ${jwt.jwt.toEncodedString}, USER_ID = ${jwt.identity},
          | EXPIRY = ${jwt.expiry}, LAST_TOUCHED = ${jwt.lastTouched} WHERE ID = ${jwt.id}
        """.stripMargin.update
 
   def delete(id: SecureRandomId): Update0 =
     sql"DELETE FROM JWT WHERE ID = $id".update
 
-  def select(id: SecureRandomId): Query0[(String, Long, Instant, Option[Instant])] =
-    sql"SELECT JWT, IDENTITY, EXPIRY, LAST_TOUCHED FROM JWT WHERE ID = $id"
-      .query[(String, Long, Instant, Option[Instant])]
+  def select(id: SecureRandomId): Query0[(String, UserId, Instant, Option[Instant])] =
+    sql"SELECT JWT, USER_ID, EXPIRY, LAST_TOUCHED FROM JWT WHERE ID = $id"
+      .query[(String, UserId, Instant, Option[Instant])]
 }
 
 class DoobieAuthRepositoryInterpreter[F[_]: Bracket[?[_], Throwable], A](
-  val key: MacSigningKey[A], 
+  val key: MacSigningKey[A],
   val xa: Transactor[F]
 )(implicit
   hs: JWSSerializer[JWSMacHeader[A]],
   s: JWSMacCV[MacErrorM, A]
-) extends BackingStore[F, SecureRandomId, AugmentedJWT[A, Long]] {
+) extends BackingStore[F, SecureRandomId, AugmentedJWT[A, UserId]] {
 
-  override def put(jwt: AugmentedJWT[A, Long]): F[AugmentedJWT[A, Long]] =
+  override def put(jwt: AugmentedJWT[A, UserId]): F[AugmentedJWT[A, UserId]] =
     AuthSQL.insert(jwt).run.transact(xa).as(jwt)
 
-  override def update(jwt: AugmentedJWT[A, Long]): F[AugmentedJWT[A, Long]] =
+  override def update(jwt: AugmentedJWT[A, UserId]): F[AugmentedJWT[A, UserId]] =
     AuthSQL.update(jwt).run.transact(xa).as(jwt)
 
   override def delete(id: SecureRandomId): F[Unit] =
     AuthSQL.delete(id).run.transact(xa).void
 
-  override def get(id: SecureRandomId): OptionT[F, AugmentedJWT[A, Long]] =
+  override def get(id: SecureRandomId): OptionT[F, AugmentedJWT[A, UserId]] =
     OptionT(AuthSQL.select(id).option.transact(xa)).semiflatMap {
       case (jwtStringify, identity, expiry, lastTouched) =>
         JWTMacImpure.verifyAndParse(jwtStringify, key) match {
-          case Left(err) => err.raiseError[F, AugmentedJWT[A, Long]]
+          case Left(err) => err.raiseError[F, AugmentedJWT[A, UserId]]
           case Right(jwt) => AugmentedJWT(id, jwt, identity, expiry, lastTouched).pure[F]
         }
     }

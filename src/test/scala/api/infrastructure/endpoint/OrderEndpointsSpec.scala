@@ -1,6 +1,7 @@
 package api.infrastructure.endpoint
 
 import api.PetStoreArbitraries
+import api.domain.implicits._
 import api.domain.orders._
 import api.infrastructure.repository.inmemory._
 import cats.effect._

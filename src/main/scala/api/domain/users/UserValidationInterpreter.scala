@@ -12,7 +12,7 @@ class UserValidationInterpreter[F[_]: Applicative](userRepo: UserRepositoryAlgeb
       .map(UserAlreadyExistsError)
       .toLeft(())
 
-  def exists(userId: Option[Long]): EitherT[F, UserNotFoundError.type, Unit] =
+  def exists(userId: Option[UserId]): EitherT[F, UserNotFoundError.type, Unit] =
     userId match {
       case Some(id) =>
         userRepo.get(id)

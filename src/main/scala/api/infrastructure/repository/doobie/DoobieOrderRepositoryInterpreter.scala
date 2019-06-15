@@ -7,6 +7,8 @@ import cats.effect.Bracket
 import cats.implicits._
 import doobie._
 import doobie.implicits._
+
+import api.domain.implicits._
 import api.domain.orders.{OrderRepositoryAlgebra, OrderStatus, Order}
 
 private object OrderSQL {

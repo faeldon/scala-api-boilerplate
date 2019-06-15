@@ -2,9 +2,10 @@ package api.domain.users
 
 import cats.Applicative
 import tsec.authorization.AuthorizationInfo
+import api.domain._
 
 case class User(
-  id: Option[Long] = None,
+  id: Option[UserId] = None,
   role: Role,
   userName: String,
   firstName: String,

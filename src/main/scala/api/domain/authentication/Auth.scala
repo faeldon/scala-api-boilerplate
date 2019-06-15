@@ -2,6 +2,7 @@ package api.domain.authentication
 
 import cats.MonadError
 import cats.effect._
+import api.domain._
 import api.domain.users.{Role, User}
 import org.http4s.Response
 import tsec.authentication.{AugmentedJWT, BackingStore, IdentityStore, JWTAuthenticator, SecuredRequest, TSecAuthService}
@@ -16,9 +17,9 @@ import scala.concurrent.duration._
 object Auth {
   def jwtAuthenticator[F[_]: Sync, Auth: JWTMacAlgo](
       key: MacSigningKey[Auth],
-      authRepo: BackingStore[F, SecureRandomId, AugmentedJWT[Auth, Long]],
-      userRepo: IdentityStore[F, Long, User])(
-      implicit cv: JWSMacCV[F, Auth]): JWTAuthenticator[F, Long, User, Auth] =
+      authRepo: BackingStore[F, SecureRandomId, AugmentedJWT[Auth, UserId]],
+      userRepo: IdentityStore[F, UserId, User])(
+      implicit cv: JWSMacCV[F, Auth]): JWTAuthenticator[F, UserId, User, Auth] =
     JWTAuthenticator.backed.inBearerToken(
       expiryDuration = 1.hour,
       maxIdle = None,
@@ -30,22 +31,22 @@ object Auth {
   private def _allRoles[F[_], Auth](implicit F: MonadError[F, Throwable]): BasicRBAC[F, Role, User, Auth] =
     BasicRBAC.all[F, Role, User, Auth]
 
-  def allRoles[F[_], Auth](pf: PartialFunction[SecuredRequest[F, User, AugmentedJWT[Auth, Long]], F[Response[F]]])
-                          (implicit F: MonadError[F, Throwable]): TSecAuthService[User, AugmentedJWT[Auth, Long], F] = {
-    TSecAuthService.withAuthorization(_allRoles[F, AugmentedJWT[Auth, Long]])(pf)
+  def allRoles[F[_], Auth](pf: PartialFunction[SecuredRequest[F, User, AugmentedJWT[Auth, UserId]], F[Response[F]]])
+                          (implicit F: MonadError[F, Throwable]): TSecAuthService[User, AugmentedJWT[Auth, UserId], F] = {
+    TSecAuthService.withAuthorization(_allRoles[F, AugmentedJWT[Auth, UserId]])(pf)
   }
 
-  def allRolesHandler[F[_], Auth](pf: PartialFunction[SecuredRequest[F, User, AugmentedJWT[Auth, Long]], F[Response[F]]])
-                                 (onNotAuthorized: TSecAuthService[User, AugmentedJWT[Auth, Long], F])
-                                 (implicit F: MonadError[F, Throwable]): TSecAuthService[User, AugmentedJWT[Auth, Long], F] = {
-    TSecAuthService.withAuthorizationHandler(_allRoles[F, AugmentedJWT[Auth, Long]])(pf, onNotAuthorized.run)
+  def allRolesHandler[F[_], Auth](pf: PartialFunction[SecuredRequest[F, User, AugmentedJWT[Auth, UserId]], F[Response[F]]])
+                                 (onNotAuthorized: TSecAuthService[User, AugmentedJWT[Auth, UserId], F])
+                                 (implicit F: MonadError[F, Throwable]): TSecAuthService[User, AugmentedJWT[Auth, UserId], F] = {
+    TSecAuthService.withAuthorizationHandler(_allRoles[F, AugmentedJWT[Auth, UserId]])(pf, onNotAuthorized.run)
   }
 
   private def _adminOnly[F[_], Auth](implicit F: MonadError[F, Throwable]): BasicRBAC[F, Role, User, Auth] =
     BasicRBAC[F, Role, User, Auth](Role.Admin)
 
-  def adminOnly[F[_], Auth](pf: PartialFunction[SecuredRequest[F, User, AugmentedJWT[Auth, Long]], F[Response[F]]])
-                          (implicit F: MonadError[F, Throwable]): TSecAuthService[User, AugmentedJWT[Auth, Long], F] = {
-    TSecAuthService.withAuthorization(_adminOnly[F, AugmentedJWT[Auth, Long]])(pf)
+  def adminOnly[F[_], Auth](pf: PartialFunction[SecuredRequest[F, User, AugmentedJWT[Auth, UserId]], F[Response[F]]])
+                          (implicit F: MonadError[F, Throwable]): TSecAuthService[User, AugmentedJWT[Auth, UserId], F] = {
+    TSecAuthService.withAuthorization(_adminOnly[F, AugmentedJWT[Auth, UserId]])(pf)
   }
 }

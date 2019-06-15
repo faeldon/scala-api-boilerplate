@@ -1,6 +1,7 @@
 package api.domain.orders
 
 import java.time.Instant
+import api.domain._
 
 case class Order(
     petId: Long,
@@ -8,5 +9,5 @@ case class Order(
     status: OrderStatus = OrderStatus.Placed,
     complete: Boolean = false,
     id: Option[Long] = None,
-    userId: Option[Long]
+    userId: Option[UserId]
 )

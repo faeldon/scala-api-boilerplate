@@ -1,5 +1,6 @@
 package api.infrastructure.repository.doobie
 
+import java.util.UUID
 import cats.data.OptionT
 import cats.effect.Bracket
 import cats.implicits._
@@ -10,6 +11,9 @@ import io.circe.syntax._
 import api.domain.users.{Role, User, UserRepositoryAlgebra}
 import tsec.authentication.IdentityStore
 import SQLPagination._
+import api.domain._
+import api.domain.implicits._
+import api.domain.syntax._
 
 private object UserSQL {
 
@@ -19,19 +23,18 @@ private object UserSQL {
 
 
   def insert(user: User): Update0 = sql"""
-    INSERT INTO USERS (ROLE, USER_NAME, FIRST_NAME, LAST_NAME, EMAIL, HASH, PHONE)
-    VALUES (${user.role}, ${user.userName}, ${user.firstName}, ${user.lastName}, ${user.email}, ${user.hash}, ${user.phone})
-    RETURNING ID
-  """.update // NOTE: Manually returning ID since postgresql is putting double quotes on "ID" causing error
+    INSERT INTO USERS (ID, ROLE, USER_NAME, FIRST_NAME, LAST_NAME, EMAIL, HASH, PHONE)
+    VALUES (${user.id}, ${user.role}, ${user.userName}, ${user.firstName}, ${user.lastName}, ${user.email}, ${user.hash}, ${user.phone})
+  """.update
 
-  def update(user: User, id: Long): Update0 = sql"""
+  def update(user: User, id: UserId): Update0 = sql"""
     UPDATE USERS
     SET ROLE = ${user.role}, FIRST_NAME = ${user.firstName}, LAST_NAME = ${user.lastName},
         EMAIL = ${user.email}, HASH = ${user.hash}, PHONE = ${user.phone}
     WHERE ID = $id
   """.update
 
-  def select(userId: Long): Query0[User] = sql"""
+  def select(userId: UserId): Query0[User] = sql"""
     SELECT ID, ROLE, USER_NAME, FIRST_NAME, LAST_NAME, EMAIL, HASH, PHONE
     FROM USERS
     WHERE ID = $userId
@@ -43,7 +46,7 @@ private object UserSQL {
     WHERE USER_NAME = $userName
   """.query[User]
 
-  def delete(userId: Long): Update0 = sql"""
+  def delete(userId: UserId): Update0 = sql"""
     DELETE FROM USERS WHERE ID = $userId
   """.update
 
@@ -55,23 +58,25 @@ private object UserSQL {
 
 class DoobieUserRepositoryInterpreter[F[_]: Bracket[?[_], Throwable]](val xa: Transactor[F])
 extends UserRepositoryAlgebra[F]
-with IdentityStore[F, Long, User] { self =>
+with IdentityStore[F, UserId, User] { self =>
   import UserSQL._
 
-  def create(user: User): F[User] =
-    insert(user).withUniqueGeneratedKeys[Long]("ID").map(id => user.copy(id = id.some)).transact(xa)
+  def create(user: User): F[User] = {
+    val newUser = user.copy(id = UUID.randomUUID().asUserId.some)
+    insert(newUser).run.transact(xa).map(_ => newUser)
+  }
 
   def update(user: User): OptionT[F, User] =
     OptionT.fromOption[F](user.id).semiflatMap { id =>
       UserSQL.update(user, id).run.transact(xa).as(user)
     }
 
-  def get(userId: Long): OptionT[F, User] = OptionT(select(userId).option.transact(xa))
+  def get(userId: UserId): OptionT[F, User] = OptionT(select(userId).option.transact(xa))
 
   def findByUserName(userName: String): OptionT[F, User] =
     OptionT(byUserName(userName).option.transact(xa))
 
-  def delete(userId: Long): OptionT[F, User] = get(userId).semiflatMap(user =>
+  def delete(userId: UserId): OptionT[F, User] = get(userId).semiflatMap(user =>
     UserSQL.delete(userId).run.transact(xa).as(user)
   )
 

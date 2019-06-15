@@ -88,7 +88,7 @@ def test_invalid_update_user(pet_context, pet_store_client):
     lookup_user = lookup.json()
 
     # Try to change the id in the user to an id that cannot exist in the database
-    update_user = dict(lookup_user, **{"lastName": new_last_name, "id": -1})
+    update_user = dict(lookup_user, **{"lastName": new_last_name, "id": "00000000-0000-0000-0000-000000000000"})
 
     response_update = pet_store_client.update_user(update_user)
     assert_that(response_update.status_code, is_(404))

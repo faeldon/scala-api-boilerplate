@@ -1,10 +1,13 @@
 package api.infrastructure.repository.inmemory
 
-import java.util.Random
+import java.util.UUID
 
 import cats.implicits._
 import cats.Applicative
 import cats.data.OptionT
+
+import api.domain._
+import api.domain.syntax._
 import api.domain.users.{User, UserRepositoryAlgebra}
 import tsec.authentication.IdentityStore
 
@@ -12,14 +15,12 @@ import scala.collection.concurrent.TrieMap
 
 class UserRepositoryInMemoryInterpreter[F[_]: Applicative]
   extends UserRepositoryAlgebra[F]
-    with IdentityStore[F, Long, User] {
+    with IdentityStore[F, UserId, User] {
 
-  private val cache = new TrieMap[Long, User]
-
-  private val random = new Random
+  private val cache = new TrieMap[UserId, User]
 
   def create(user: User): F[User] = {
-    val id = random.nextLong
+    val id = UUID.randomUUID().asUserId
     val toSave = user.copy(id = id.some)
     cache += (id -> toSave)
     toSave.pure[F]
@@ -32,10 +33,10 @@ class UserRepositoryInMemoryInterpreter[F[_]: Applicative]
     }
   }
 
-  def get(id: Long): OptionT[F, User] =
+  def get(id: UserId): OptionT[F, User] =
     OptionT.fromOption(cache.get(id))
 
-  def delete(id: Long): OptionT[F, User] =
+  def delete(id: UserId): OptionT[F, User] =
     OptionT.fromOption(cache.remove(id))
 
   def findByUserName(userName: String): OptionT[F, User] =

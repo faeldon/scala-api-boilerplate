@@ -10,6 +10,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, HttpRoutes}
 
 import api.domain._
+import api.domain.implicits._
 import api.domain.users._
 import api.domain.authentication._
 import tsec.common.Verified
@@ -30,7 +31,7 @@ class UserEndpoints[F[_]: Sync, A,  Auth: JWTMacAlgo] extends Http4sDsl[F] {
 
   private def loginEndpoint(userService: UserService[F],
                             cryptService: PasswordHasher[F, A],
-                            auth: Authenticator[F, Long, User, AugmentedJWT[Auth, Long]]): HttpRoutes[F] =
+                            auth: Authenticator[F, UserId, User, AugmentedJWT[Auth, UserId]]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ POST -> Root / "login" =>
         val action = for {
@@ -110,7 +111,7 @@ class UserEndpoints[F[_]: Sync, A,  Auth: JWTMacAlgo] extends Http4sDsl[F] {
 
   def endpoints(userService: UserService[F],
                 cryptService: PasswordHasher[F, A],
-                auth: SecuredRequestHandler[F, Long, User, AugmentedJWT[Auth, Long]]): HttpRoutes[F] = {
+                auth: SecuredRequestHandler[F, UserId, User, AugmentedJWT[Auth, UserId]]): HttpRoutes[F] = {
     val authEndpoints: AuthService[F, Auth] =
       Auth.adminOnly {
         updateEndpoint(userService) orElse
@@ -131,7 +132,7 @@ object UserEndpoints {
   def endpoints[F[_]: Sync, A, Auth: JWTMacAlgo](
     userService: UserService[F],
     cryptService: PasswordHasher[F, A],
-    auth: SecuredRequestHandler[F, Long, User, AugmentedJWT[Auth, Long]]
+    auth: SecuredRequestHandler[F, UserId, User, AugmentedJWT[Auth, UserId]]
   ): HttpRoutes[F] =
     new UserEndpoints[F, A, Auth].endpoints(userService, cryptService, auth)
 }

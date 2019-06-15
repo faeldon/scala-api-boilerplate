@@ -8,6 +8,8 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
+import api.domain._
+import api.domain.implicits._
 import api.domain.OrderNotFoundError
 import api.domain.authentication.Auth
 import api.domain.orders.{Order, OrderService}
@@ -47,7 +49,7 @@ class OrderEndpoints[F[_]: Sync, Auth: JWTMacAlgo] extends Http4sDsl[F] {
   }
 
   def endpoints(orderService: OrderService[F],
-                auth: SecuredRequestHandler[F, Long, User, AugmentedJWT[Auth, Long]]): HttpRoutes[F] = {
+                auth: SecuredRequestHandler[F, UserId, User, AugmentedJWT[Auth, UserId]]): HttpRoutes[F] = {
     val authEndpoints: AuthService[F, Auth]  =
       Auth.allRolesHandler(placeOrderEndpoint(orderService) orElse getOrderEndpoint(orderService)) {
         Auth.adminOnly(deleteOrderEndpoint(orderService))
@@ -59,6 +61,6 @@ class OrderEndpoints[F[_]: Sync, Auth: JWTMacAlgo] extends Http4sDsl[F] {
 
 object OrderEndpoints {
   def endpoints[F[_]: Sync, Auth: JWTMacAlgo](orderService: OrderService[F],
-                              auth: SecuredRequestHandler[F, Long, User, AugmentedJWT[Auth, Long]]): HttpRoutes[F] =
+                              auth: SecuredRequestHandler[F, UserId, User, AugmentedJWT[Auth, UserId]]): HttpRoutes[F] =
     new OrderEndpoints[F, Auth].endpoints(orderService, auth)
 }
