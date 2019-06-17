@@ -15,7 +15,7 @@ jobs:
         - sbt stage
 
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport
+        - sbt ++$TRAVIS_SCALA_VERSION coverage test coverageReport
         - ./build.sh
 
       after_success:
