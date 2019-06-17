@@ -1,4 +1,5 @@
-# Scala API Boilerplate [![License: MIT][license-badge]][license-link] [![Build Status][build-badge]][build-link] [![Chat][gitter-badge]][gitter-link]
+# Scala API Boilerplate [![License: MIT][license-badge]][license-link] [![Build Status][build-badge]][build-link] [![codecov][codecov-badge]][codecov-link] [![Chat][gitter-badge]][gitter-link]
+
 
 A TypeLevel API Boilerplate inspired by [scala-pet-store](https://github.com/pauljamescleary/scala-pet-store)
 
@@ -110,3 +111,5 @@ please read the [code of conduct](./.github/CODE_OF_CONDUCT.md).
 [build-link]: https://travis-ci.org/faeldon/scala-api-boilerplate
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-link]: https://gitter.im/faeldon/scala-api-boilerplate
+[codecov-badge]: https://codecov.io/gh/faeldon/scala-api-boilerplate/branch/master/graph/badge.svg
+[codecov-link]: https://codecov.io/gh/faeldon/scala-api-boilerplate
